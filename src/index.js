@@ -8,6 +8,7 @@ const multer= require("multer");
 const { AppConfig } = require('aws-sdk');
 app.use(bodyParser.json());
 
+
 app.use(multer().any())
 
 mongoose.connect("mongodb+srv://dhaval-functionup:gRrFSwHIong4NV9B@cluster0.az0cl.mongodb.net/pro-5(group-27)?retryWrites=true&w=majority", {
