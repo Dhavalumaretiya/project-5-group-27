@@ -1,23 +1,8 @@
 const userModel = require("../models/userModel");
 const awsConfig = require("../utils/aws");
+const validator = require("../utils/validation")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
-// ----------------------------------Validation-----------------------------------------------------------
-const isValid = function (value) {
-    if (typeof value === 'undefined' || value === null) return false
-    if (typeof value === 'string' && value.trim().length === 0) return false
-    return true
-};
-
-const isValidRequestBody = function (requestBody) {
-    return Object.keys(requestBody).length > 0
-};
-
-const vaildObjectId = function (objectId) {
-    if (objectId.length == 24) return true
-    return false
-};
 
 //-------------------------------------Create User-----------------------------------------------------
 
@@ -27,22 +12,22 @@ const createUser = async function (req, res) {
         const saltRounds = 10;
 
         //Validation Start
-        if (!isValidRequestBody(requestBody)) {
+        if (!validator.validRequestBody(requestBody)) {
             return res.status(400).send({ status: false, message: "Please enter details" })
         }
 
         //Extract Params
         const { fname, lname, email, password, phone } = requestBody
 
-        if (!isValid(fname)) {
+        if (!validator.isValid(fname)) {
             return res.status(400).send({ status: false, message: 'First Name is required' })
         }
 
-        if (!isValid(lname)) {
+        if (!validator.isValid(lname)) {
             return res.status(400).send({ status: false, message: 'Last Name is required' })
         }
 
-        if (!isValid(email)) {
+        if (!validator.isValid(email)) {
             return res.status(400).send({ status: false, message: 'Email is required' })
         }
         //check for valid mail
@@ -55,7 +40,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, message: 'This email is already registered' })
         }
 
-        if (!isValid(password)) {
+        if (!validator.isValid(password)) {
             return res.status(400).send({ status: false, message: 'Password is required' })
         }
         //check for password length
@@ -65,7 +50,7 @@ const createUser = async function (req, res) {
         // Bcrypt password
         requestBody.password = await bcrypt.hash(password, saltRounds)
 
-        if (!isValid(phone)) {
+        if (!validator.isValid(phone)) {
             return res.status(400).send({ status: false, message: 'Phone no is required' })
         }
         //check for unique no
@@ -80,29 +65,29 @@ const createUser = async function (req, res) {
 
         let shipping = requestBody.address.shipping
 
-        if (!isValid(shipping.street)) {
+        if (!validator.isValid(shipping.street)) {
             return res.status(400).send({ status: false, message: 'Street is required' })
         }
 
-        if (!isValid(shipping.city)) {
+        if (!validator.isValid(shipping.city)) {
             return res.status(400).send({ status: false, message: 'City is required' })
         }
 
-        if (!isValid(shipping.pincode)) {
+        if (!validator.isValid(shipping.pincode)) {
             return res.status(400).send({ status: false, message: 'Pincode is required' })
         }
 
         let billing = requestBody.address.billing
 
-        if (!isValid(billing.street)) {
+        if (!validator.isValid(billing.street)) {
             return res.status(400).send({ status: false, message: 'Street is required' })
         }
 
-        if (!isValid(billing.city)) {
+        if (!validator.isValid(billing.city)) {
             return res.status(400).send({ status: false, message: 'City is required' })
         }
 
-        if (!isValid(billing.pincode)) {
+        if (!validator.isValid(billing.pincode)) {
             return res.status(400).send({ status: false, message: 'Pincode is required' })
         }
         //Validation End
@@ -137,15 +122,15 @@ const loginUser = async function (req, res) {
         //Extract Params
         let { email, password } = requestBody
 
-        if (!isValidRequestBody(requestBody)) {
+        if (!validator.validRequestBody(requestBody)) {
             return res.status(400).send({ status: false, message: "Please enter details in body." })
         }
         //Validation start
-        if (!isValid(email)) {
+        if (!validator.isValid(email)) {
             return res.status(400).send({ status: false, message: "Please enter an email address." })
         }
 
-        if (!isValid(password)) {
+        if (!validator.isValid(password)) {
             return res.status(400).send({ status: false, message: "Please enter Password." })
         }
 
@@ -185,7 +170,7 @@ const getUser = async function (req, res) {
         let userIdfromToken = req.userId;
 
         //Validation start
-        if (!vaildObjectId(userId))
+        if (!validator.vaildObjectId(userId))
             return res.status(400).send({ status: false, message: "Please enter vaild User id in params." });
         //Validation End
 
@@ -214,10 +199,10 @@ const updateUser = async function (req, res) {
         let files = req.files;
 
         //Validation start
-        if (!vaildObjectId(userId))
+        if (!validator.vaildObjectId(userId))
             return res.status(400).send({ status: false, message: "Please enter vaild User id in params." });
 
-        if (!isValidRequestBody(updateData)) {
+        if (!validator.validRequestBody(updateData)) {
             return res.status(400).send({ status: false, message: "Invaild request parameters.please provides a details" })
         }
 
@@ -233,15 +218,15 @@ const updateUser = async function (req, res) {
         //Extract Params
         let { fname, lname, email, profileImage, phone, password, address } = updateData
 
-        if (!isValid(fname)) {
+        if (!validator.isValid(fname)) {
             return res.status(400).send({ status: false, message: 'First Name is required' })
         }
 
-        if (!isValid(lname)) {
+        if (!validator.isValid(lname)) {
             return res.status(400).send({ status: false, message: 'Last Name is required' })
         }
 
-        if (!isValid(email)) {
+        if (!validator.isValid(email)) {
             return res.status(400).send({ status: false, message: 'Email is required' })
         }
         //check for valid mail
@@ -265,7 +250,7 @@ const updateUser = async function (req, res) {
         }
 
         let pass = password
-        if (!isValid(pass)) {
+        if (!validator.isValid(pass)) {
             return res.status(400).send({ status: false, message: 'Password is required' })
         }
         //check for password length
@@ -281,20 +266,20 @@ const updateUser = async function (req, res) {
             let shippingAddresstoString = JSON.stringify(address);
             let stringtoObject = JSON.parse(shippingAddresstoString);
 
-            if (isValidRequestBody(stringtoObject)) {
+            if (validator.validRequestBody(stringtoObject)) {
                 if (stringtoObject.hasOwnProperty('shipping')) {
                     if (stringtoObject.shipping.hasOwnProperty('street')) {
-                        if (!isValid(stringtoObject.shipping.street)) {
+                        if (!validator.isValid(stringtoObject.shipping.street)) {
                             return res.status(400).send({ status: false, message: " Invalid request parameters. Please provide shipping address's Street" });
                         }
                     }
                     if (stringtoObject.shipping.hasOwnProperty('city')) {
-                        if (!isValid(stringtoObject.shipping.city)) {
+                        if (!validator.isValid(stringtoObject.shipping.city)) {
                             return res.status(400).send({ status: false, message: " Invalid request parameters. Please provide shipping address's City" });
                         }
                     }
                     if (stringtoObject.shipping.hasOwnProperty('pincode')) {
-                        if (!isValid(stringtoObject.shipping.pincode)) {
+                        if (!validator.isValid(stringtoObject.shipping.pincode)) {
                             return res.status(400).send({ status: false, message: " Invalid request parameters. Please provide shipping address's pincode" });
                         }
                     }
@@ -317,20 +302,20 @@ const updateUser = async function (req, res) {
             let billingAddressToString = JSON.stringify(address)
             let parsedBillingAddress = JSON.parse(billingAddressToString)
 
-            if (isValidRequestBody(parsedBillingAddress)) {
+            if (validator.validRequestBody(parsedBillingAddress)) {
                 if (parsedBillingAddress.hasOwnProperty('billing')) {
                     if (parsedBillingAddress.billing.hasOwnProperty('street')) {
-                        if (!isValid(parsedBillingAddress.billing.street)) {
+                        if (!validator.isValid(parsedBillingAddress.billing.street)) {
                             return res.status(400).send({ status: false, message: " Invalid request parameters. Please provide billing address's Street" });
                         }
                     }
                     if (parsedBillingAddress.billing.hasOwnProperty('city')) {
-                        if (!isValid(parsedBillingAddress.billing.city)) {
+                        if (!validator.isValid(parsedBillingAddress.billing.city)) {
                             return res.status(400).send({ status: false, message: " Invalid request parameters. Please provide billing address's City" });
                         }
                     }
                     if (parsedBillingAddress.billing.hasOwnProperty('pincode')) {
-                        if (!isValid(parsedBillingAddress.billing.pincode)) {
+                        if (!validator.isValid(parsedBillingAddress.billing.pincode)) {
                             return res.status(400).send({ status: false, message: " Invalid request parameters. Please provide billing address's pincode" });
                         }
                     }
@@ -346,7 +331,7 @@ const updateUser = async function (req, res) {
         }
 
         if (files) {
-            if (isValid(files)) {
+            if (validator.isValid(files)) {
                 if (!(files && files.length > 0)) {
                     return res.status(400).send({ status: false, message: "No file found" });
                 }
