@@ -10,8 +10,7 @@ router.post('/login', userController.loginUser);
 router.get('/user/:userId/profile', auth.auth,userController.getUser);
 router.put('/user/:userId/profile', auth.auth,userController.updateUser);
 
-// Product APIs
-router.post('/products', productController.createProduct);
+
 
 
 
