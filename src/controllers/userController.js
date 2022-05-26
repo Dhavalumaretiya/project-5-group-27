@@ -206,24 +206,24 @@ const updateUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Invaild request parameters.please provides a details" })
         }
 
-        let findUser = await userModel.findOneAndUpdate({ _id: userId })
+        let findUser = await userModel.findOne({ _id: userId })
         if (!findUser) {
             return res.status(400).send({ status: false, message: "User not found." });
         }
 
-        // if (updateData._id.toString() != userIdfromToken) {
-        //     res.status(401).send({ status: false, message: "Unauthorized access!!" });
-        // }
+        if (findUser._id.toString() != userIdfromToken) {
+            res.status(401).send({ status: false, message: "Unauthorized access!!" });
+        }
 
         //Extract Params
-        let { fname, lname, email, profileImage, phone, password, address } = updateData
+        let { fname, lname, email, profileImage, phone, password, address } = updateData 
 
         if (!validator.isValid(fname)) {
             return res.status(400).send({ status: false, message: 'First Name is required' })
         }
 
         if (!validator.isValid(lname)) {
-            return res.status(400).send({ status: false, message: 'Last Name is required' })
+            return res.status(400).send({ status: false, message: 'Last Name is required' }) 
         }
 
         if (!validator.isValid(email)) {
@@ -359,7 +359,7 @@ const updateUser = async function (req, res) {
             }
         }, { new: true })
 
-        return res.status(200).send({ status: true, data: {updateUserData,uploadedFileURL}});
+        return res.status(200).send({ status: true, message:'Success',data: updateUserData});
 
     } catch (err) {
         res.status(500).send({ message: "Server not responding", error: err.message });
