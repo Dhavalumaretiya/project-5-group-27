@@ -92,16 +92,15 @@ const getProductsByQuery = async function (req, res) {
     try {
         const filterQuery = { isDeleted: false } //complete object details.
         const queryParams = req.query;
-
+        
+        // validation start
         if (validator.validRequestBody(queryParams)) {
-            const { size, name, priceGreaterThan, priceLessThan, priceSort } = queryParams;
+            let { size, name, priceGreaterThan, priceLessThan, priceSort } = queryParams;
 
-            //validation starts.
             if (validator.isValid(size)) {
                 filterQuery['availableSizes'] = size
             }
-
-            //using $regex to match the subString of the names of products & "i" for case insensitive.
+    
             if (validator.isValid(name)) {
                 filterQuery['title'] = {}
                 filterQuery['title']['$regex'] = name
@@ -111,7 +110,7 @@ const getProductsByQuery = async function (req, res) {
             //setting price for ranging the product's price to fetch them.
             if (validator.isValid(priceGreaterThan)) {
 
-                if (!(!isNaN(Number(priceGreaterThan)))) {
+                if (!(!isNaN(Number(priceGreaterThan)))) {  ``
                     return res.status(400).send({ status: false, message: `priceGreaterThan should be a valid number` })
                 }
                 if (priceGreaterThan <= 0) {
@@ -162,7 +161,7 @@ const getProductsByQuery = async function (req, res) {
             return res.status(404).send({ productStatus: false, message: 'No Product found' })
         }
 
-        return res.status(200).send({ status: true, message: 'Product list:', data: products })
+        return res.status(200).send({ status: true, message: 'Product list', data: products })
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
     }
@@ -323,3 +322,6 @@ const deleteProduct = async function (req,res){
 
 // -----------------------------------------Exports----------------------------------------------------------------
 module.exports = { createProduct, getProductsByQuery, getProductById, updateProduct,deleteProduct }
+
+
+
