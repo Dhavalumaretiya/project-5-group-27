@@ -92,8 +92,8 @@ const createUser = async function (req, res) {
         }
         //Validation End
 
-        //File-cloud Data for storing image
-        let files = req.files
+        // Uplode image
+        let files = req.files;
 
         if (!(files && files.length > 0))
             return res.status(400).send({ status: false, message: "No file found" });
@@ -101,6 +101,7 @@ const createUser = async function (req, res) {
         let uploadedFileURL = await awsConfig.uploadFile(files[0]);
 
         requestBody.profileImage = uploadedFileURL;
+
 
         const registerUser = await userModel.create(requestBody);
 
@@ -152,7 +153,7 @@ const loginUser = async function (req, res) {
                 iat: Math.floor(Date.now() / 1000),
                 exp: Math.floor(Date.now() / 1000) + 10 * 60 * 60
             },
-            'project-5-Products Management'
+            'project-5-Products_Management'
         )
 
         res.status(200).send({ status: true, message: 'Success', userId: { userId, token } });

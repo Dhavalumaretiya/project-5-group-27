@@ -12,6 +12,10 @@ router.put('/user/:userId/profile', auth.auth,userController.updateUser);
 
 // Product APIs
 router.post('/products', productController.createProduct);  
+router.get('/products', productController.getProductsByQuery);  
+router.get('/products/:productId', productController.getProductById);  
+router.put('/products/:productId', productController.updateProduct);  
+router.delete('/products/:productId', productController.deleteProduct);  
 
 
 
