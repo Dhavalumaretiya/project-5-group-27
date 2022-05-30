@@ -92,7 +92,7 @@ const getProductsByQuery = async function (req, res) {
     try {
         const filterQuery = { isDeleted: false } //complete object details.
         const queryParams = req.query;
-        
+
         // validation start
         if (validator.validRequestBody(queryParams)) {
             let { size, name, priceGreaterThan, priceLessThan, priceSort } = queryParams;
@@ -100,25 +100,26 @@ const getProductsByQuery = async function (req, res) {
             if (validator.isValid(size)) {
                 filterQuery['availableSizes'] = size
             }
-    
+
             if (validator.isValid(name)) {
-                filterQuery['title'] = {}
-                filterQuery['title']['$regex'] = name
-                filterQuery['title']['$options'] = 'i'
+                filterQuery['title'] = {}                   //regex take a object as a input
+                filterQuery['title']['$regex'] = name     
+                // filterQuery['title']['$options'] = 'i'
             }
 
             //setting price for ranging the product's price to fetch them.
             if (validator.isValid(priceGreaterThan)) {
 
-                if (!(!isNaN(Number(priceGreaterThan)))) {  ``
+                if (!(!isNaN(Number(priceGreaterThan)))) {
+                    
                     return res.status(400).send({ status: false, message: `priceGreaterThan should be a valid number` })
                 }
                 if (priceGreaterThan <= 0) {
                     return res.status(400).send({ status: false, message: `priceGreaterThan should be a valid number` })
                 }
                 if (!filterQuery.hasOwnProperty('price'))
-                    filterQuery['price'] = {}
-                filterQuery['price']['$gte'] = Number(priceGreaterThan) 
+                    // filterQuery['price'] = {}
+                filterQuery['price']['$gte'] = Number(priceGreaterThan)
                 //console.log(typeof Number(priceGreaterThan))
             }
 
@@ -285,7 +286,7 @@ const updateProduct = async function (req, res) {
             }
         }
 
-        let updateData = await productModel.findOneAndUpdate({ _id:findProduct }, requestBody, { new: true })
+        let updateData = await productModel.findOneAndUpdate({ _id: findProduct }, requestBody, { new: true })
 
         res.status(200).send({ status: true, message: 'Product Updated Successfully', data: updateData })
     }
@@ -296,32 +297,32 @@ const updateProduct = async function (req, res) {
 };
 
 //--------------------------------------------Delete product-------------------------------------------------------
-const deleteProduct = async function (req,res){
-    try{
+const deleteProduct = async function (req, res) {
+    try {
         productId = req.params.productId;
 
-        if (!validator.validRequestBody(productId)) 
-        return res.status(400).send({ status: false, message: "Please enter atleast one key for updation" })
+        if (!validator.validRequestBody(productId))
+            return res.status(400).send({ status: false, message: "Please enter atleast one key for updation" })
 
-        if (!validator.vaildObjectId(productId)) 
-        return res.status(400).send({ status: false, message: "Invalid product Id." })
+        if (!validator.vaildObjectId(productId))
+            return res.status(400).send({ status: false, message: "Invalid product Id." })
 
         const getproduct = await productModel.findOne({ _id: productId, isDeleted: false })
 
-        if (!getproduct) 
-        return res.status(404).send({ status: false, message: "No document found or it maybe deleted" })
+        if (!getproduct)
+            return res.status(404).send({ status: false, message: "No document found or it maybe deleted" })
 
-        const deleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: Date.now()} }, { new: true })
+        const deleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
 
         return res.status(200).send({ status: true, message: "successfully deleted", data: deleteProduct })
     }
-    catch(err){
-        res.status(500).send({status:false, Message: err.message})
+    catch (err) {
+        res.status(500).send({ status: false, Message: err.message })
     }
 };
 
 // -----------------------------------------Exports----------------------------------------------------------------
-module.exports = { createProduct, getProductsByQuery, getProductById, updateProduct,deleteProduct }
+module.exports = { createProduct, getProductsByQuery, getProductById, updateProduct, deleteProduct }
 
 
 

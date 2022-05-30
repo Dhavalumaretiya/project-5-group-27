@@ -15,5 +15,11 @@ const vaildObjectId = function (objectId) {
     return false
 };
 
+const vailsQuantity = function isInteger(value){
+    if(value<1) return false
+    if(isNaN(Number(value)))  return false
+    if(value % 1 ===0)  return true
+}
 
-module.exports= {isValid,validRequestBody,vaildObjectId} 
+
+module.exports= {isValid,validRequestBody,vaildObjectId, vailsQuantity} 
