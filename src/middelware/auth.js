@@ -1,73 +1,58 @@
+const userModel = require("../models/userModel");
+const validator = require("../utils/validation");
 const jwt = require("jsonwebtoken");
 
-const auth = function (req, res, next) {
+// ---------------------------------------Authentication------------------------------------------------------------------
+const authentication = function (req, res, next) {
     try {
+        let bearerHeader = req.headers.authorization;
 
-        let token = req.headers['authorization'];
+        if (typeof bearerHeader == "undefined") return res.status(400).send({ status: false, message: "Token is missing, please enter a token" });
 
-        if (typeof token === 'undefined') {
-            return res.status(400).send({ status: false, message: "please enter token." });
-        }
-        let bearer = token.split(" ");
-        let bearerToken = bearer[1]; 
+        let bearerToken = bearerHeader.split(' ');
 
-        jwt.verify(bearerToken, "project-5-Products Management", function (err, data) {
+        let token = bearerToken[1];
+
+        jwt.verify(token, "project-5-Products_Management", function (err, data) {
             if (err) {
-                return res.status(400).send({ status: false, message: "Invaild user" });
-            } 
-            else {
-                // if token expired
-                if (Date.now() > decodedToken.exp * 1000) {
-                return res.status(401).send({status: false,message: "Session Expired"});
-             }
-                req.userId = decodedToken.userId;
-                // console.log(req.userId)
-                // console.log(decodedToken.userId)
-                next();
+                return res.status(400).send({ status: false, message: "Token is invalid" })
             }
-        })
-    }
-    catch (err) {
+           else {
+                req.decodedToken = data;
+                next()
+            }
+        });
+    } catch (err) {
         res.status(500).send({ message: err.message });
     }
-}
+};
 
-module.exports = { auth }
+// ----------------------------------------Authorization-------------------------------------------------------------
+const authorization = async (req, res, next) => {
+    try {
+        let userId = req.params.userId;
+        let userIdfromToken = req.decodedToken.userId;
 
-// const auth = function (req, res, next) {
-//     try
-//     {
-//         let token = req.headers['authorization']
+        if (!validator.vaildObjectId(userId))
+            return res.status(400).send({ status: false, message: "Please enter vaild User id in params." });
 
-//         // if no token found
-//         if (typeof token=='undefined') {
-//             return res.status(400).send({status: false,message: "Token required! Please login to generate token"});
-//         }    
+        // if(!userId) return res.status(400).send({ status: false, message: "User-id is required" })
 
-//         let bearer = token.split(" ")
-//         let bearerToken = bearer[1]
+        let findUser = await userModel.findOne({ _id: userId })
+        if (!findUser) {
+            return res.status(400).send({ status: false, message: "User not found." });
+        }
 
-//         jwt.verify(bearerToken, "project-5-Products_Management", { ignoreExpiration: true },function (error, decodedToken) {
-//             // if token is invalid
-//             if (error) {
-//                 return res.status(400).send({status: false,message: "Token is invalid"});
-//             }    
-//             // if token is valid
-//             else {
-//                 // if token expired
-//                 if (Date.now() > decodedToken.exp * 1000) {
-//                     return res.status(401).send({status: false,message: "Session Expired"});
-//                 }
-//                 req.userId = decodedToken.userId;
-//                 // console.log(req.userId)
-//                 // console.log(decodedToken.userId)
-//                 next();
-//             }
-//         })
-     
-//     }catch (err) {
-//         res.status(500).send({ message: err.message });
-//     }
-// }
+        if (findUser._id.toString() !== userIdfromToken) {
+            res.status(401).send({ status: false, message: "Unauthorized access!!" });
+        }
 
-// module.exports = { auth }
+        next();
+    } catch (err) {
+        res.status(500).send({ status: false, error: err.message });
+    }
+};
+
+// ---------------------------------------Exports---------------------------------------------------------------------
+module.exports = { authentication, authorization }
+

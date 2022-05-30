@@ -1,4 +1,6 @@
 
+
+
 const isValid = function (value) {
     if (typeof value === 'undefined' || value === null) return false
     if (typeof value === 'string' && value.trim().length === 0) return false
@@ -15,11 +17,16 @@ const vaildObjectId = function (objectId) {
     return false
 };
 
-const vailsQuantity = function isInteger(value){
+const vaildQuantity = function isInteger(value){
     if(value<1) return false
-    if(isNaN(Number(value)))  return false
+  
     if(value % 1 ===0)  return true
 }
+// const isValidObjId = (objectId) => {
+//     return mongoose.Types.ObjectId.isValid(objectId);
+//   }
+// const isValidNum = (num) => {
+//     return /^[0-9]*[1-9]+$|^[1-9]+[0-9]*$/.test(num);
+// }
 
-
-module.exports= {isValid,validRequestBody,vaildObjectId, vailsQuantity} 
+module.exports= {isValid,validRequestBody,vaildObjectId,vaildQuantity}  

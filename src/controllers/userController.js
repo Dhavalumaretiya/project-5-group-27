@@ -149,9 +149,9 @@ const loginUser = async function (req, res) {
         // create token
         let token = jwt.sign(
             {
-                userId: user._id.toString(),
-                iat: Math.floor(Date.now() / 1000),
-                exp: Math.floor(Date.now() / 1000) + 10 * 60 * 60
+                userId : user._id.toString(),
+                iat : Math.floor(Date.now()/1000),
+                exp : Math.floor(Date.now()/1000) + 24 * 60 * 60
             },
             'project-5-Products_Management'
         )
@@ -166,26 +166,13 @@ const loginUser = async function (req, res) {
 //-------------------------------------get User profile----------------------------------------------------
 
 const getUser = async function (req, res) {
-    try {
+    try{
         let userId = req.params.userId;
-        let userIdfromToken = req.userId;
-
-        //Validation start
-        if (!validator.vaildObjectId(userId))
-            return res.status(400).send({ status: false, message: "Please enter vaild User id in params." });
-        //Validation End
-
-        let fetchUserData = await userModel.findOne({ _id: userId }).select({ address: 1, _id: 1, fname: 1, lname: 1, email: 1, profileImage: 1, phone: 1, password: 1, createdAt: 1, updatedAt: 1, __v: 1 })
-        if (!fetchUserData) {
-            return res.status(400).send({ status: false, message: "User not found." });
-        }
-
-        if (fetchUserData._id.toString() != userIdfromToken) {
-            res.status(401).send({ status: false, message: "Unauthorized access!!" });
-        }
-        res.status(200).send({ status: true, message: 'User profile details.', userId: fetchUserData });
-
-    } catch (err) {
+      
+        //getting the user document
+        const user = await userModel.findOne({ _id: userId})
+        return res.status(200).send({ status: true, message: 'User Profile Details', data: user})
+      } catch (err) {
         res.status(500).send({ message: "Server not responding", error: err.message });
     }
 };
@@ -195,27 +182,15 @@ const getUser = async function (req, res) {
 const updateUser = async function (req, res) {
     try {
         let updateData = req.body;
-        let userId = req.params.userId;
-        let userIdfromToken = req.userId;
         let files = req.files;
 
         //Validation start
-        if (!validator.vaildObjectId(userId))
-            return res.status(400).send({ status: false, message: "Please enter vaild User id in params." });
 
         if (!validator.validRequestBody(updateData)) {
             return res.status(400).send({ status: false, message: "Invaild request parameters.please provides a details" })
         }
 
-        let findUser = await userModel.findOne({ _id: userId })
-        if (!findUser) {
-            return res.status(400).send({ status: false, message: "User not found." });
-        }
-
-        if (findUser._id.toString() != userIdfromToken) {
-            res.status(401).send({ status: false, message: "Unauthorized access!!" });
-        }
-
+    
         //Extract Params
         let { fname, lname, email, profileImage, phone, password, address } = updateData 
 
