@@ -4,6 +4,7 @@ const router = express.Router();
 const userController = require("../controllers/userController");
 const productController = require("../controllers/productController");
 const cartController = require("../controllers/cartController");
+const orderController = require("../controllers/orderController");
 const auth = require("../middelware/auth")
 
 // User APIs
@@ -23,6 +24,10 @@ router.delete('/products/:productId', productController.deleteProduct);
 router.post('/users/:userId/cart',auth.authentication,auth.authorization,cartController.createCart); 
 router.put('/users/:userId/cart',auth.authentication,auth.authorization,cartController.updateCart); 
 router.get('/users/:userId/cart',auth.authentication,auth.authorization,cartController.getCart); 
-router.delete('/users/:userId/cart',auth.authentication,auth.authorization,cartController.deleteCart); 
+router.delete('/users/:userId/cart',auth.authentication,auth.authorization,cartController.deleteCart);
+
+// order APIs
+router.post('/users/:userId/orders',auth.authentication,auth.authorization,orderController.createOrder);
+
 
 module.exports = router;    
