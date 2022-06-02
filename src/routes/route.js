@@ -28,6 +28,7 @@ router.delete('/users/:userId/cart',auth.authentication,auth.authorization,cartC
 
 // order APIs
 router.post('/users/:userId/orders',auth.authentication,auth.authorization,orderController.createOrder);
+router.put('/users/:userId/orders',auth.authentication,auth.authorization,orderController.updateOrder);
 
 
-module.exports = router;    
+module.exports = router;     

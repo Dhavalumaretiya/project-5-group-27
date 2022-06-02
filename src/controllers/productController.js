@@ -8,7 +8,7 @@ const createProduct = async function (req, res) {
         const requestBody = req.body
         //Validation Start
         if (!validator.validRequestBody(requestBody)) {
-            return res.status(400).send({ status: false, message: 'Body Data is required' })
+            return res.status(400).send({ status: false, message: 'Invalid request body. Please provide the the input to proceed' })
         }
 
         //Extract params
@@ -104,7 +104,7 @@ const getProductsByQuery = async function (req, res) {
             if (validator.isValid(name)) {
                 filterQuery['title'] = {}                   //regex take a object as a input
                 filterQuery['title']['$regex'] = name     
-                // filterQuery['title']['$options'] = 'i'
+                filterQuery['title']['$options'] = 'i'
             }
 
             //setting price for ranging the product's price to fetch them.
@@ -302,7 +302,7 @@ const deleteProduct = async function (req, res) {
         productId = req.params.productId;
 
         if (!validator.validRequestBody(productId))
-            return res.status(400).send({ status: false, message: "Please enter atleast one key for updation" })
+            return res.status(400).send({ status: false, message: "Invalid request body. Please provide the the input to proceed" })
 
         if (!validator.vaildObjectId(productId))
             return res.status(400).send({ status: false, message: "Invalid product Id." })

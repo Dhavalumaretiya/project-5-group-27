@@ -8,26 +8,27 @@ const validator = require("../utils/validation");
 const createCart = async function (req, res) {
     try {
         const requestBody = req.body;
-        var { items} = requestBody;
+        var { items, } = requestBody;
         let userId = req.params.userId;
 
         // validation starts
         if (!validator.validRequestBody(requestBody)) {
-            return res.status(400).send({ status: false, message: 'Body Data is required' })
+            return res.status(400).send({ status: false, message: 'Invalid request body. Please provide the the input to proceed' })
         };
 
         if (!validator.vaildObjectId(userId)) {
             return res.status(400).send({ status: false, message: 'UserId id is invalid' })
         };
+        
         const { quantity, productId } = items
         // console.log(Object.keys(items))
         if (!validator.vaildObjectId(productId)) {
             return res.status(400).send({ status: false, message: 'Product id Id is invalid' })
         };
         //   console.log(quantity)
-        if (!validator.isValid(quantity) || !validator.vaildQuantity(quantity)) {
-            return res.status(400).send({ status: false, message: "Please provide valid quantity & it must be greater than zero." })
-        }
+        // if (!validator.isValid(quantity) || !validator.vaildQuantity(quantity)) {
+        //     return res.status(400).send({ status: false, message: "Please provide valid quantity & it must be greater than zero." })
+        // }
         //   validation end
 
         // find product

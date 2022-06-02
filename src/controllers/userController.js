@@ -13,7 +13,7 @@ const createUser = async function (req, res) {
 
         //Validation Start
         if (!validator.validRequestBody(requestBody)) {
-            return res.status(400).send({ status: false, message: "Please enter details" })
+            return res.status(400).send({ status: false, message: "Invalid request body. Please provide the the input to proceed" })
         }
 
         //Extract Params
@@ -124,7 +124,7 @@ const loginUser = async function (req, res) {
         let { email, password } = requestBody
 
         if (!validator.validRequestBody(requestBody)) {
-            return res.status(400).send({ status: false, message: "Please enter details in body." })
+            return res.status(400).send({ status: false, message:"Invalid request body. Please provide the the input to proceed" })
         }
         //Validation start
         if (!validator.isValid(email)) {
@@ -187,7 +187,7 @@ const updateUser = async function (req, res) {
         //Validation start
 
         if (!validator.validRequestBody(updateData)) {
-            return res.status(400).send({ status: false, message: "Invaild request parameters.please provides a details" })
+            return res.status(400).send({ status: false, message: "Invalid request body. Please provide the the input to proceed" })
         }
 
     
