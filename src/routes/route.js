@@ -27,7 +27,7 @@ router.get('/users/:userId/cart',auth.authentication,auth.authorization,cartCont
 router.delete('/users/:userId/cart',auth.authentication,auth.authorization,cartController.deleteCart);
 
 // order APIs
-router.post('/users/:userId/orders',auth.authentication,auth.authorization,orderController.createOrder);
+router.post('/users/:userId/orders',auth.authentication,auth.authorization,orderController.createOrder); 
 router.put('/users/:userId/orders',auth.authentication,auth.authorization,orderController.updateOrder);
 
 

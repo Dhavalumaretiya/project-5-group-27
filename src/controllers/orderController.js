@@ -74,17 +74,61 @@ const createOrder = async function (req, res) {
         };
 
         const savedOrder = await orderModel.create(orderDetails);
-
-        //Empty the cart after the successfull order
-        await cartModel.findOneAndUpdate({ _id: cartId, userId: userId }, { $set: { items: [], totalPrice: 0, totalItems: 0, }, });
-
-        return res.status(200).send({ status: true, message: "Order placed.", data: savedOrder });
+        return res.status(200).send({ status: true, message: "Sucessfully Order placed", data: savedOrder });
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
     }
 };
 
+// ------------------------------------Update order------------------------------------------------------------
 
+const updateOrder = async function (req, res) {
+    try {
+        let userId = req.params.userId;
+        //Extract Params
+        const { orderId, isDeleted, status } = req.body;
+
+        if (!validator.validRequestBody(req.body)) {
+            return res.status(400).send({ status: false, message: "Invalid request body. Please provide the the input to proceed", });
+        };
+
+        if (!orderId)
+            return res.status(400).send({ status: false, message: "orderId is required field" });
+
+        if (!validator.vaildObjectId(orderId)) {
+            return res.status(400).send({ status: false, message: "Invalid orderId in body." });
+        };
+
+        let findOrderDateils = await orderModel.findOne({ _id: orderId, userId, isDeleted: false, });
+
+        if (!findOrderDateils) return res.status(404).send({ status: false, message: "order not found with this UserId and OrderId" });
+        // if cancellable true 
+        if (findOrderDateils.cancellable) {
+            if (isDeleted == true) {
+                let updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId, userId }, { isDeleted, status, deletedAt: Date.now() }, { new: true });
+
+                return res.status(200).send({ status: true, message: "sucessfully Order updated. ", data: updatedOrder });
+            }
+
+            let updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId, userId }, { status }, { new: true });
+            return res.status(200).send({ status: true, message: "sucessfully Order updated..", data: updatedOrder });
+        };
+        // if cancellable false & status is cancelled
+        if (!findOrderDateils.cancellable && status == "cancelled")
+            return res.status(400).send({ status: false, message: "cant modify status to cancelled,as cancellable is false", });
+
+        if (isDeleted == true) {
+            let updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId, userId }, { isDeleted, status, deletedAt: Date.now() }, { new: true });
+            return res.status(200).send({ status: true, message: "sucessfully Order updated...", data: updatedOrder });
+        };
+
+        let updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId, userId }, { status }, { new: true });
+        return res.status(200).send({ status: true, message: "sucessfully Order updated....", data: updatedOrder, });
+    }
+    catch (err) {
+        return res.status(500).send({ status: false, message: err.message });
+    }
+};
 // ------------------------------------Exports---------------------------------------------------------------
-module.exports = { createOrder,updateOrder }
+module.exports = { createOrder, updateOrder }
