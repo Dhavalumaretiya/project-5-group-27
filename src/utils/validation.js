@@ -15,15 +15,17 @@ const vaildObjectId = function (objectId) {
     return false
 };
 
-const vaildQuantity = function isInteger(value){
-    if(value<1) return false
-  
-    if(value % 1 ===0)  return true
+const isValidName = function (name)  {
+    return /^[a-zA-Z ]{3,30}$/.test(name)
 };
+
+const isValidAvailableSizes = function(size) {
+    return ["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size) == true
+}
 
 const isValidStatus = function(status) {
     return ['pending', 'completed', 'cancelled'].indexOf(status) !== -1
-}
+};
 
 
-module.exports= {isValid,validRequestBody,vaildObjectId,vaildQuantity,isValidStatus}  
+module.exports= {isValid,validRequestBody,vaildObjectId,isValidName,isValidAvailableSizes,isValidStatus}  

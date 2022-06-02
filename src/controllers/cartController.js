@@ -8,7 +8,7 @@ const validator = require("../utils/validation");
 const createCart = async function (req, res) {
     try {
         const requestBody = req.body;
-        var { items, } = requestBody;
+        var { items} = requestBody;
         let userId = req.params.userId;
 
         // validation starts
@@ -23,13 +23,9 @@ const createCart = async function (req, res) {
         const { quantity, productId } = items
         // console.log(Object.keys(items))
         if (!validator.vaildObjectId(productId)) {
-            return res.status(400).send({ status: false, message: 'Product id Id is invalid' })
+            return res.status(400).send({ status: false, message: 'Product id Id is invalid' }) 
         };
-        //   console.log(quantity)
-        // if (!validator.isValid(quantity) || !validator.vaildQuantity(quantity)) {
-        //     return res.status(400).send({ status: false, message: "Please provide valid quantity & it must be greater than zero." })
-        // }
-        //   validation end
+        //validation end
 
         // find product
         const findProductData = await productModel.findOne({ _id: productId })
@@ -76,7 +72,7 @@ const createCart = async function (req, res) {
             }
             itemsArr.push({ productId: productId, quantity: quantity }) //storing the updated prices and quantity to the newly created array.
 
-            let updatedCart = { items: itemsArr, totalPrice: price, totalItems: itemsArr.length }
+            let updatedCart = { items: itemsArr, totalPrice:  findCartData.totalPrice + (items.quantity * findProductData.price), totalItems: itemsArr.length }
             let responseData = await cartModel.findOneAndUpdate({ _id: findCartData._id }, updatedCart, { new: true })
 
             return res.status(200).send({ status: true, message: `Product added successfully`, data: responseData })

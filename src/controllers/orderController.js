@@ -114,7 +114,7 @@ const updateOrder = async function (req, res) {
             let updatedOrder = await orderModel.findOneAndUpdate({ _id: orderId, userId }, { status }, { new: true });
             return res.status(200).send({ status: true, message: "sucessfully Order updated..", data: updatedOrder });
         };
-        // if cancellable false & status is cancelled
+        // if cancellable true & status is cancelled
         if (!findOrderDateils.cancellable && status == "cancelled")
             return res.status(400).send({ status: false, message: "cant modify status to cancelled,as cancellable is false", });
 
@@ -127,7 +127,7 @@ const updateOrder = async function (req, res) {
         return res.status(200).send({ status: true, message: "sucessfully Order updated....", data: updatedOrder, });
     }
     catch (err) {
-        return res.status(500).send({ status: false, message: err.message });
+        return res.status(500).send({ status: false, message: err.message });  
     }
 };
 // ------------------------------------Exports---------------------------------------------------------------

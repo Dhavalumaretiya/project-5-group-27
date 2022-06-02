@@ -90,79 +90,58 @@ const createProduct = async function (req, res) {
 
 const getProductsByQuery = async function (req, res) {
     try {
-        const filterQuery = { isDeleted: false } //complete object details.
-        const queryParams = req.query;
+        const queryParams = req.query
+        //Extract params
+        let { size, name, priceGreaterThan, priceLessThan, priceSort} = queryParams
 
+        const filterQuery = { isDeleted: false, ...req.query }
         // validation start
-        if (validator.validRequestBody(queryParams)) {
-            let { size, name, priceGreaterThan, priceLessThan, priceSort } = queryParams;
+        if (size) {
+            if (!size) return res.status(400).send({ status: false, msg: "provide size" })
 
-            if (validator.isValid(size)) {
-                filterQuery['availableSizes'] = size
+            if (!validator.isValidAvailableSizes(size))
+                return res.status(400).send({ status: false, msg: `Size should be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
+            filterQuery['availableSizes'] = size
+        };
+
+        if (priceGreaterThan) {
+            if (!(/^(0|[1-9][0-9]*)$/.test(priceGreaterThan)))
+                return res.status(400).send({ status: false, msg: "provide priceGreaterThan in numeric" })
+            filterQuery['price'] = { $gt: priceGreaterThan }
+        };
+
+        if (priceLessThan) {
+            if (!(/^(0|[1-9][0-9]*)$/.test(priceLessThan)))
+                return res.status(400).send({ status: false, msg: "provide priceLessThan in numeric" })
+            filterQuery['price'] = { $lt: priceLessThan }
+        };
+       
+        if (validator.isValid(name)) {
+        filterQuery['title'] = { $regex: name, $options: "i" };
+        };
+
+        // validation of priceSort
+        if(priceSort){
+            if (!((priceSort == 1) || (priceSort == -1))){
+                return res.status(400).send({status : false, message : "Price sort only takes 1 or -1 as a value" })
             }
 
-            if (validator.isValid(name)) {
-                filterQuery['title'] = {}                   //regex take a object as a input
-                filterQuery['title']['$regex'] = name     
-                filterQuery['title']['$options'] = 'i'
+            let filterProduct = await productModel.find(filterQuery).sort({price: priceSort})
+    
+            if(filterProduct.length>0){
+                return res.status(200).send({status : false, message : "Success", data : filterProduct})
             }
-
-            //setting price for ranging the product's price to fetch them.
-            if (validator.isValid(priceGreaterThan)) {
-
-                if (!(!isNaN(Number(priceGreaterThan)))) {
-                    
-                    return res.status(400).send({ status: false, message: `priceGreaterThan should be a valid number` })
-                }
-                if (priceGreaterThan <= 0) {
-                    return res.status(400).send({ status: false, message: `priceGreaterThan should be a valid number` })
-                }
-                if (!filterQuery.hasOwnProperty('price'))
-                    // filterQuery['price'] = {}
-                filterQuery['price']['$gte'] = Number(priceGreaterThan)
-                //console.log(typeof Number(priceGreaterThan))
+            else{
+                return res.status(404).send({status : false, message : "No products found with this query"})
             }
+        };
+        // validation end
 
-            //setting price for ranging the product's price to fetch them.
-            if (validator.isValid(priceLessThan)) {
+        const products = await productModel.find({ ...filterQuery }).sort({ price: 1 }) //rest operator
 
-                if (!(!isNaN(Number(priceLessThan)))) {
-                    return res.status(400).send({ status: false, message: `priceLessThan should be a valid number` })
-                }
-                if (priceLessThan <= 0) {
-                    return res.status(400).send({ status: false, message: `priceLessThan should be a valid number` })
-                }
-                if (!filterQuery.hasOwnProperty('price'))
-                    filterQuery['price'] = {}
-                filterQuery['price']['$lte'] = Number(priceLessThan)
-                //console.log(typeof Number(priceLessThan))
-            }
+        if (!(products.length)) return res.status(404).send({ status: false, msg: 'Product not found' })
+        return res.status(200).send({ status: true, msg: "Success", data: products })
 
-            //sorting the products acc. to prices => 1 for ascending & -1 for descending.
-            if (validator.isValid(priceSort)) {
-
-                if (!((priceSort == 1) || (priceSort == -1))) {
-                    return res.status(400).send({ status: false, message: `priceSort should be 1 or -1 ` })
-                }
-
-                const products = await productModel.find(filterQuery).sort({ price: priceSort })
-                // console.log(products)
-                if (Array.isArray(products) && products.length === 0) {
-                    return res.status(404).send({ productStatus: false, message: 'No Product found' })
-                }
-
-                return res.status(200).send({ status: true, message: 'Product list', data2: products })
-            }
-        }
-
-        const products = await productModel.find(filterQuery)
-
-        //verifying is it an array and having some data in that array.
-        if (Array.isArray(products) && products.length === 0) {
-            return res.status(404).send({ productStatus: false, message: 'No Product found' })
-        }
-
-        return res.status(200).send({ status: true, message: 'Product list', data: products })
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
     }
@@ -225,7 +204,7 @@ const updateProduct = async function (req, res) {
         const { title, description, price, currencyId, currencyFormat, availableSizes } = requestBody
 
         if (title) {
-            if (!isValid(title)) {
+            if (!validator.isValid(title)) {
                 return res.status(400).send({ status: false, message: 'Title is required' })
             }
             //Check for unique title
@@ -236,13 +215,13 @@ const updateProduct = async function (req, res) {
         }
 
         if (description) {
-            if (!isValid(description)) {
+            if (!validator.isValid(description)) {
                 return res.status(400).send({ status: false, message: 'Description is required' })
             }
         }
 
         if (price) {
-            if (!isValid(price)) {
+            if (!validator.isValid(price)) {
                 return res.status(400).send({ status: false, message: 'Price is required' })
             }
             //Check for valid number/decimal
@@ -252,7 +231,7 @@ const updateProduct = async function (req, res) {
         }
 
         if (currencyId) {
-            if (!isValid(currencyId)) {
+            if (!validator.isValid(currencyId)) {
                 return res.status(400).send({ status: false, message: 'CurrencyId is required' })
             }
             //Check for INR
@@ -262,7 +241,7 @@ const updateProduct = async function (req, res) {
         }
 
         if (currencyFormat) {
-            if (!isValid(currencyFormat)) {
+            if (!validator.isValid(currencyFormat)) {
                 return res.status(400).send({ status: false, message: 'CurrencyFormat is required' })
             }
             //check for symbol ->
@@ -272,7 +251,7 @@ const updateProduct = async function (req, res) {
         }
 
         if (availableSizes) {
-            if (!isValid(availableSizes)) {
+            if (!validator.isValid(availableSizes)) {
                 return res.status(400).send({ status: false, message: 'AvailableSizes is required' })
             }
             let array = availableSizes.split(",").map(x => x.toUpperCase().trim())
