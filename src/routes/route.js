@@ -10,7 +10,7 @@ const auth = require("../middelware/auth")
 // User APIs
 router.post('/register', userController.createUser);
 router.post('/login', userController.loginUser);
-router.get('/user/:userId/profile', auth.authentication,userController.getUser);
+router.get('/user/:userId/profile', auth.authentication,auth.authorization,userController.getUser);
 router.put('/user/:userId/profile', auth.authentication,auth.authorization,userController.updateUser);
 
 // Product APIs

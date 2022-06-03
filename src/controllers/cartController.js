@@ -94,7 +94,7 @@ const updateCart = async function (req, res) {
         }
 
         //Extract body
-        const { cartId, productId, removeProduct, price } = requestBody
+        const { cartId, productId, removeProduct} = requestBody
         if (!validator.validRequestBody(requestBody)) {
             return res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide cart details.' })
         }
@@ -179,32 +179,17 @@ const updateCart = async function (req, res) {
 //fetching cart details.
 const getCart = async function (req, res) {
     try {
-        const userId = req.params.userId;
+        let userId = req.params.userId;
 
-        //validation starts
-        if (!validator.vaildObjectId(userId)) {
-            return res.status(400).send({ status: false, message: "Invalid userId in params." })
-        }
-        //validation ends
+        if (!validator.vaildObjectId(userId)) return res.status(400).send({ status: false, message: "userId is invalid" })
 
-        const findUser = await userModel.findById({ _id: userId })
-        if (!findUser) {
-            return res.status(400).send({
-                status: false,
-                message: `User doesn't exists by ${userId} `
-            })
-        }
+        let findcart = await cartModel.findOne({ userId: req.params.userId }).populate("items.productId").select({ "items._id": 0, __v: 0 })
 
-        const findCart = await cartModel.findOne({ userId: userId })
+        if (findcart.userId != userId) return res.status(401).send({ status: false, message: "userId of cart not matched with user,unauthorized" })
 
-        if (!findCart) {
-            return res.status(400).send({
-                status: false,
-                message: `Cart doesn't exists by ${userId} `
-            })
-        }
+        if (!findcart) return res.status(404).send({ status: false, message: "cart is not present for this user" })
 
-        return res.status(200).send({ status: true, message: "Successfully fetched cart.", data: findCart })
+        return res.status(200).send({ status: true, message: "Cart details", data: findcart })
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message });
